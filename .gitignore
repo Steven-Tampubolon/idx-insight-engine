@@ -26,3 +26,7 @@ data/cache.db
 .vscode/
 .idea/
 *.swp
+# Databases & Cache
+*.db
+cache.db
+data/cache.db
