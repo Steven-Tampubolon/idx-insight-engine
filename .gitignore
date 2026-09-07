@@ -17,6 +17,11 @@ venv/
 .DS_Store
 Thumbs.db
 
+# Databases & Cache
+*.db
+cache.db
+data/cache.db
+
 # IDE
 .vscode/
 .idea/
