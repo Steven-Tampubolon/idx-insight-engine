@@ -1,12 +1,16 @@
 # pages/3_🤖_AI_Query.py
 import streamlit as st
-from core.agent import run_query
+import importlib
+import core.agent as _agent_mod
+importlib.reload(_agent_mod)
+run_query = _agent_mod.run_query
 
 st.set_page_config(page_title="AI Query — IDX Insight Engine",
                    page_icon="🤖", layout="wide")
 
 st.title("🤖 AI Query")
-st.caption("Tanya apa saja tentang saham IDX · Gemini 1.5 Flash + cache lokal · **0 Sectors credits**")
+
+st.caption("Tanya apa saja tentang saham IDX · Groq Qwen 3.8B + Sectors API v2 · hemat credits via cache")
 
 # ── Session state ─────────────────────────────────────────────────────────────
 if "messages"      not in st.session_state: st.session_state.messages      = []
@@ -36,10 +40,10 @@ if pending:
 
 # ── Suggested queries (hanya tampil saat chat kosong & tidak ada pending) ──────
 SUGGESTED = [
-    "Saham bank mana yang ROE-nya paling tinggi?",
-    "Bandingkan PE ratio sektor telekomunikasi IDX",
-    "Tampilkan 10 saham dengan dividend yield tertinggi",
-    "Sub-sektor mana yang rata-rata ROE-nya terbaik?",
+    "Bandingkan PE ratio 3 bank terbesar IDX",
+    "Saham sektor coal mana yang PB-nya paling murah?",
+    "Tampilkan 5 saham dengan market cap terbesar",
+    "Bandingkan valuasi BBCA vs BMRI vs BBRI",
 ]
 
 if not st.session_state.messages and not pending:
@@ -73,7 +77,7 @@ if query:
 
     # Panggil Gemini & tampilkan respons
     with st.chat_message("assistant"):
-        with st.spinner("Gemini sedang menganalisis... ⏳"):
+        with st.spinner("Groq Agent sedang menganalisis... ⏳"):
             answer, tool_log = run_query(query)
 
         st.markdown(answer)

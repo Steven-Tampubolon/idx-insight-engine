@@ -240,14 +240,14 @@ with right_col:
 
             st.divider()
 
-            # Generate atau load dari session cache (Gemini, gratis)
+            # Generate atau load dari session cache (Groq, gratis)
             if symbol not in st.session_state.explanations:
-                with st.spinner("Gemini menganalisis anomali... ⏳"):
+                with st.spinner("Groq menganalisis anomali... ⏳"):
                     try:
                         narasi = explain_anomaly(symbol, row_data)
                         st.session_state.explanations[symbol] = narasi
                     except Exception as e:
-                        st.error(f"Gagal memanggil Gemini: {e}")
+                        st.error(f"Gagal memanggil Groq: {e}")
                         st.stop()
 
             st.markdown(st.session_state.explanations[symbol])
@@ -265,6 +265,6 @@ with right_col:
                     st.rerun()
             with b2:
                 if st.button("🔄 Refresh narasi", use_container_width=True,
-                             help="Hapus cache dan generate ulang dari Gemini"):
+                             help="Hapus cache dan generate ulang dari Groq"):
                     st.session_state.explanations.pop(symbol, None)
                     st.rerun()

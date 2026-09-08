@@ -1,5 +1,12 @@
 # pages/1_📊_Screener.py
+# pages/3_🤖_AI_Query.py
 import streamlit as st
+import importlib
+
+# Import fresh setiap kali page di-load
+import core.agent
+importlib.reload(core.agent)
+from core.agent import run_query
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -16,11 +23,11 @@ st.caption("Buat formula scoring sendiri · Data dari SQLite cache — **0 Secto
 # ── Konfigurasi metrik ────────────────────────────────────────────────────────
 # (label, default_lower_is_better, default_weight)
 METRICS = {
-    "forward_pe"     : ("PE Ratio",          True,  70),
-    "pb"             : ("Price / Book",      True,  60),
-    "roe"            : ("ROE (%)",           False, 80),
-    "dividend_yield" : ("Dividend Yield (%)", False, 50),
-    "market_cap"     : ("Market Cap",        False, 30),
+    "forward_pe" : ("Forward PE",    True,  70),
+    "pe_ttm"     : ("PE (TTM)",      True,  65),
+    "pb"         : ("Price / Book",  True,  60),
+    "ps"         : ("Price / Sales", True,  40),
+    "market_cap" : ("Market Cap",    False, 30),
 }
 
 # ── Load data ─────────────────────────────────────────────────────────────────
@@ -85,12 +92,16 @@ if not any(weights.values()):
 df_f        = df_raw[df_raw["sub_sector"].isin(sel_subs)].copy()
 invert_list = [m for m, v in inverts.items() if v]
 df_scored   = build_score(df_f, sel_metrics, weights, norm_method, invert_list)
-df_scored["rank"] = df_scored["score"].rank(ascending=False, method="first").astype(int)
+df_scored["rank"] = df_scored["score"].rank(ascending=False, method="first").fillna(0).astype(int)
 df_top      = df_scored.nsmallest(top_n, "rank").reset_index(drop=True)
 
 # ── Metric cards ──────────────────────────────────────────────────────────────
 c1, c2, c3, c4 = st.columns(4)
-best = df_scored.loc[df_scored["score"].idxmax()]
+valid = df_scored[df_scored["score"].notna()]
+if valid.empty:
+    st.warning("Tidak ada data metrik untuk sub-sektor yang dipilih.")
+    st.stop()
+best = valid.loc[valid["score"].idxmax()]
 c1.metric("Perusahaan dianalisis", len(df_scored))
 c2.metric("Sub-sektor aktif",       len(sel_subs))
 c3.metric("🥇 Top company",  best.get("company_name", best["symbol"]))
