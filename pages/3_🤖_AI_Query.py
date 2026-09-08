@@ -29,7 +29,8 @@ with st.sidebar:
     st.markdown(
         "- `get_company_metrics` — data satu saham\n"
         "- `get_sector_companies` — daftar per sub-sektor\n"
-        "- `get_top_by_metric` — ranking berdasarkan metrik"
+        "- `get_top_by_metric` — ranking berdasarkan metrik\n"
+        "- `get_subsector_summary` — perbandingan antar sub-sektor"
     )
     st.caption("Semua baca dari SQLite cache — 0 Sectors credits")
 
@@ -40,10 +41,10 @@ if pending:
 
 # ── Suggested queries (hanya tampil saat chat kosong & tidak ada pending) ──────
 SUGGESTED = [
-    "Bandingkan PE ratio 3 bank terbesar IDX",
-    "Saham sektor coal mana yang PB-nya paling murah?",
-    "Tampilkan 5 saham dengan market cap terbesar",
-    "Bandingkan valuasi BBCA vs BMRI vs BBRI",
+    "Bandingkan PE ratio BBCA, BMRI, dan BBRI",
+    "Sub-sektor mana yang rata-rata PB-nya paling murah?",
+    "Tampilkan 5 saham dengan market cap terbesar di IDX",
+    "Saham sektor banks mana yang forward PE-nya paling rendah?",
 ]
 
 if not st.session_state.messages and not pending:

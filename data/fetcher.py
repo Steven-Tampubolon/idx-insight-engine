@@ -78,18 +78,20 @@ def _extract_metrics(data: dict) -> dict:
         latest_hist = sorted(hist, key=lambda x: x.get("year", 0), reverse=True)[0]
 
     return {
-        "company_name"  : data.get("company_name"),
-        "sub_sector"    : overview.get("sub_sector"),
-        "market_cap"    : overview.get("market_cap"),
-        "forward_pe"    : valuation.get("forward_pe"),
-        "pe_ttm"        : latest_hist.get("pe"),
-        "pb"            : latest_hist.get("pb"),
-        "ps"            : latest_hist.get("ps"),
-        "pb_peer_avg"   : latest_hist.get("pb_peer_avg"),
-        "pe_peer_avg"   : latest_hist.get("pe_peer_avg"),
+        "company_name"     : data.get("company_name"),
+        "sub_sector"       : overview.get("sub_sector"),
+        "market_cap"       : overview.get("market_cap"),
+        "last_close_price" : overview.get("last_close_price"),
+        "daily_change"     : overview.get("daily_change"),
+        "forward_pe"       : valuation.get("forward_pe"),
+        "pe_ttm"           : latest_hist.get("pe"),
+        "pb"               : latest_hist.get("pb"),
+        "ps"               : latest_hist.get("ps"),
+        "pb_peer_avg"      : latest_hist.get("pb_peer_avg"),
+        "pe_peer_avg"      : latest_hist.get("pe_peer_avg"),
         # roe & dividend_yield tidak tersedia di sections ini — hemat credits
-        "roe"           : None,
-        "dividend_yield": None,
+        "roe"              : None,
+        "dividend_yield"   : None,
     }
 
 # ── Public API ─────────────────────────────────────────────────────────────────
