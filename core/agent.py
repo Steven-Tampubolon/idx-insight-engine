@@ -1,11 +1,14 @@
 # core/agent.py
+"""
+Agent AI untuk IDX Insight Engine.
+Menggunakan Groq API (Qwen) dengan manual tool-calling loop.
+Semua data diambil dari SQLite cache (0 Sectors credits) atau API v2 (lazy cache).
+"""
 import json
 import os
 import time
 
 import pandas as pd
-import importlib
-import core.agent as _agent_mod
 from groq import Groq
 from data.fetcher import (
     get_all_companies,

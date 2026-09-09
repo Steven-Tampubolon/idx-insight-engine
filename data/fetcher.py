@@ -67,31 +67,41 @@ def _get_nested(data, *keys):
 
 def _extract_metrics(data: dict) -> dict:
     """Ekstrak metrik dari response company/report/{symbol}/ v2."""
-    overview   = data.get("overview",   {}) or {}
-    valuation  = data.get("valuation",  {}) or {}
+    overview  = data.get("overview",  {}) or {}
+    valuation = data.get("valuation", {}) or {}
+    financials = data.get("financials", {}) or {}
+    dividend   = data.get("dividend",  {}) or {}
 
     # Ambil historical_valuation tahun terbaru
     hist = valuation.get("historical_valuation", []) or []
     latest_hist = {}
     if isinstance(hist, list) and hist:
-        # Sort by year descending, ambil yang terbaru
         latest_hist = sorted(hist, key=lambda x: x.get("year", 0), reverse=True)[0]
 
+    # Ambil ROE dari historical_financial_ratio tahun terbaru
+    fin_ratios = financials.get("historical_financial_ratio", []) or []
+    latest_ratio = {}
+    if isinstance(fin_ratios, list) and fin_ratios:
+        latest_ratio = sorted(fin_ratios, key=lambda x: x.get("year", 0), reverse=True)[0]
+    roe = latest_ratio.get("profitability", {}).get("roe") if latest_ratio else None
+
+    # Ambil dividend yield TTM
+    div_yield = dividend.get("yield_ttm")
+
     return {
-        "company_name"     : data.get("company_name"),
-        "sub_sector"       : overview.get("sub_sector"),
-        "market_cap"       : overview.get("market_cap"),
-        "last_close_price" : overview.get("last_close_price"),
-        "daily_change"     : overview.get("daily_change"),
-        "forward_pe"       : valuation.get("forward_pe"),
-        "pe_ttm"           : latest_hist.get("pe"),
-        "pb"               : latest_hist.get("pb"),
-        "ps"               : latest_hist.get("ps"),
-        "pb_peer_avg"      : latest_hist.get("pb_peer_avg"),
-        "pe_peer_avg"      : latest_hist.get("pe_peer_avg"),
-        # roe & dividend_yield tidak tersedia di sections ini — hemat credits
-        "roe"              : None,
-        "dividend_yield"   : None,
+        "company_name"    : data.get("company_name"),
+        "sub_sector"      : overview.get("sub_sector"),
+        "market_cap"      : overview.get("market_cap"),
+        "last_close_price": overview.get("last_close_price"),
+        "daily_change"    : overview.get("daily_close_change"),
+        "forward_pe"      : valuation.get("forward_pe"),
+        "pe_ttm"          : latest_hist.get("pe"),
+        "pb"              : latest_hist.get("pb"),
+        "ps"              : latest_hist.get("ps"),
+        "pb_peer_avg"     : latest_hist.get("pb_peer_avg"),
+        "pe_peer_avg"     : latest_hist.get("pe_peer_avg"),
+        "roe"             : roe,
+        "dividend_yield"  : div_yield,
     }
 
 # ── Public API ─────────────────────────────────────────────────────────────────
@@ -220,13 +230,12 @@ def get_company_details(symbol: str) -> dict:
         r = requests.get(
             f"{BASE}/company/report/{symbol}/",
             headers=HDR,
-            params={"sections": "overview,valuation"},
+            params={"sections": "overview,valuation,financials,dividend"},  # ← tambah sections
             timeout=10
         )
         r.raise_for_status()
         data = r.json()
 
-        # Simpan ke company_reports agar next time dari cache
         conn = _conn()
         conn.execute(
             "INSERT OR REPLACE INTO company_reports (symbol, data) VALUES (?,?)",

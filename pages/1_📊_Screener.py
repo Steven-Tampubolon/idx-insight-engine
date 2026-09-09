@@ -1,12 +1,7 @@
 # pages/1_📊_Screener.py
-# pages/3_🤖_AI_Query.py
 import streamlit as st
-import importlib
 
 # Import fresh setiap kali page di-load
-import core.agent
-importlib.reload(core.agent)
-from core.agent import run_query
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -23,11 +18,13 @@ st.caption("Buat formula scoring sendiri · Data dari SQLite cache — **0 Secto
 # ── Konfigurasi metrik ────────────────────────────────────────────────────────
 # (label, default_lower_is_better, default_weight)
 METRICS = {
-    "forward_pe" : ("Forward PE",    True,  70),
-    "pe_ttm"     : ("PE (TTM)",      True,  65),
-    "pb"         : ("Price / Book",  True,  60),
-    "ps"         : ("Price / Sales", True,  40),
-    "market_cap" : ("Market Cap",    False, 30),
+    "forward_pe"     : ("Forward PE",         True,  70),
+    "pe_ttm"         : ("PE (TTM)",           True,  65),
+    "pb"             : ("Price / Book",       True,  60),
+    "ps"             : ("Price / Sales",      True,  40),
+    "roe"            : ("ROE (%)",            False, 80),
+    "dividend_yield" : ("Dividend Yield (%)", False, 50),
+    "market_cap"     : ("Market Cap",         False, 30),
 }
 
 # ── Load data ─────────────────────────────────────────────────────────────────
