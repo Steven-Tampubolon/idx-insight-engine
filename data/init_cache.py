@@ -2,8 +2,12 @@
 """
 python -m data.init_cache
 Inisialisasi SQLite cache dengan data dari Sectors API v2.
-Estimasi biaya: 1 credit (ambil subsectors) + 1 credit per subsector = ~30-40 credits total
-Jalankan SEKALI sebelum demo.
+Estimasi biaya:
+- 1 credit untuk GET /v2/subsectors/
+- ~1 credit per subsector untuk GET /v2/companies/ (screener)
+- 4 credits per company untuk GET /v2/company/report/{sym}/ (terkonfirmasi)
+- Total jika fetch 100 company reports: ~421 credits
+- Jalankan SEKALI saja — jangan ulangi tanpa hitung credit dulu.Jalankan SEKALI sebelum demo.
 """
 import json
 import os
@@ -167,7 +171,7 @@ def main() -> None:
             r = requests.get(
                 f"{BASE}/company/report/{sym}/",
                 headers=HDR,
-                params={"sections": "overview,valuation"},
+                params={"sections": "overview,valuation,financials,dividend"},
                 timeout=10
             )
             if r.status_code == 200:

@@ -21,12 +21,48 @@ Aplikasi ini menggabungkan tiga pendekatan analisis yang saling melengkapi:
 | 🔍 **Anomaly Dashboard** | Deteksi saham yang berperilaku statistik berbeda dari median peer sub-sektornya menggunakan z-score |
 | 🤖 **AI Query** | Tanya apa saja tentang saham IDX dalam Bahasa Indonesia — agent memilih tools secara otonom |
 
+## Fitur Unggulan: Explainable Anomaly ★
+
+Anomaly detection biasa hanya memberi tahu *bahwa* suatu saham anomali.
+IDX Insight Engine melangkah lebih jauh — AI menjelaskan *mengapa*.
+
+**Alur kerja:**
+1. Z-score dihitung untuk setiap saham vs. median peer sub-sektornya
+2. Saham dengan |z-score| > 2.0 di-flag sebagai anomali
+3. Klik **Explain ✨** → AI (Groq) menerima data anomali + konteks finansial
+4. AI menghasilkan narasi 2 paragraf: penyebab statistik + interpretasi fundamental
+
+**Contoh output:**
+> *"BBCA menunjukkan PE ratio 25.6x — 2.3 standar deviasi di atas median sub-sektor banks
+> (18.4x). Hal ini mencerminkan premium valuasi yang konsisten dibayarkan investor untuk
+> kualitas aset defensif dan dominasi CASA perseroan..."*
+
+Ini adalah **derived insight** — bukan sekadar menampilkan data mentah,
+melainkan interpretasi yang membutuhkan konteks lintas-metrik.
+
 ### Mengapa Sectors API?
 
 Seluruh data finansial bersumber dari **Sectors REST API v2** — bukan sekadar dekoratif. Jika API key Sectors dihapus dan cache dikosongkan, seluruh fungsi utama aplikasi lumpuh:
 - Screener tidak bisa menampilkan metrik (PE, ROE, PB, dll.)
 - Anomaly detection tidak punya data untuk dianalisis
 - AI agent tidak bisa menjawab query finansial
+
+**Contoh dependensi nyata**: Jika hanya data PE yang tersedia (tanpa ROE dari Sectors),
+anomaly detection degrades dari 4-metrik ke 2-metrik — kehilangan kemampuan deteksi
+anomali profitabilitas yang justru paling relevan untuk investor.
+
+---
+
+## Tampilan Aplikasi
+
+### Screener
+![Custom Stock Screener](docs/screenshots/screener.png)
+
+### Anomaly Dashboard
+![Anomaly Dashboard dengan AI Explanation](docs/screenshots/anomaly.png)
+
+### AI Query
+![AI Query dengan Tool Call Log](docs/screenshots/ai_query.png)
 
 ---
 

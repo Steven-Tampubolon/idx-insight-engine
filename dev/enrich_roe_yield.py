@@ -3,7 +3,9 @@ dev/enrich_roe_yield.py
 Enrich company_reports yang sudah ada dengan data financials + dividend.
 Jalankan dari root: python dev/enrich_roe_yield.py
 
-Estimasi credit: 1 per company = ~162 credits untuk 162 records yang ada.
+PERINGATAN: Biaya AKTUAL adalah 4 credits per company (bukan 1).
+162 companies × 4 = 648 credits. JANGAN jalankan tanpa cek saldo dulu.
+Alternatif lebih murah: gunakan dev/enrich_from_screener.py (~20 credits).
 """
 import json
 import os

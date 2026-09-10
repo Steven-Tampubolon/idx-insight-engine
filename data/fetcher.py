@@ -65,12 +65,33 @@ def _get_nested(data, *keys):
                 return found
     return None
 
+def _normalize_subsector(name):
+    """Samakan konvensi nama sub-sektor: 'Banks' -> 'banks', 'Oil, Gas & Coal' -> 'oil-gas-coal'.
+
+    company_reports mengembalikan pretty name di overview.sub_sector,
+    sedangkan companies table memakai slug. Tanpa normalisasi, peer group
+    di anomaly detection terfragmentasi jadi dua grup terpisah.
+    """
+    if not name:
+        return name
+    return (name.strip().lower()
+                 .replace(",", "")
+                 .replace(" & ", "-")
+                 .replace("&", "-")
+                 .replace(" ", "-"))
+
 def _extract_metrics(data: dict) -> dict:
-    """Ekstrak metrik dari response company/report/{symbol}/ v2."""
-    overview  = data.get("overview",  {}) or {}
-    valuation = data.get("valuation", {}) or {}
+    """Ekstrak metrik dari response company/report/{symbol}/ v2.
+
+    Defensif: mencoba beberapa path kemungkinan untuk ROE dan dividend yield,
+    karena struktur response v2 bisa bervariasi antar endpoint/versi.
+    Mengembalikan None (bukan exception) jika data tidak ditemukan.
+    """
+    data       = data or {}
+    overview   = data.get("overview",   {}) or {}
+    valuation  = data.get("valuation",  {}) or {}
     financials = data.get("financials", {}) or {}
-    dividend   = data.get("dividend",  {}) or {}
+    dividend   = data.get("dividend",   {}) or {}
 
     # Ambil historical_valuation tahun terbaru
     hist = valuation.get("historical_valuation", []) or []
@@ -78,15 +99,35 @@ def _extract_metrics(data: dict) -> dict:
     if isinstance(hist, list) and hist:
         latest_hist = sorted(hist, key=lambda x: x.get("year", 0), reverse=True)[0]
 
-    # Ambil ROE dari historical_financial_ratio tahun terbaru
+    # Ambil historical_financial_ratio tahun terbaru
     fin_ratios = financials.get("historical_financial_ratio", []) or []
     latest_ratio = {}
     if isinstance(fin_ratios, list) and fin_ratios:
         latest_ratio = sorted(fin_ratios, key=lambda x: x.get("year", 0), reverse=True)[0]
-    roe = latest_ratio.get("profitability", {}).get("roe") if latest_ratio else None
 
-    # Ambil dividend yield TTM
-    div_yield = dividend.get("yield_ttm")
+    # ── ROE: cari dari berbagai kemungkinan path ─────────────────────────
+    roe = (
+        # Path 1: financials.historical_financial_ratio[].profitability.roe
+        (latest_ratio.get("profitability") or {}).get("roe")
+        # Path 2: financials.historical_financial_ratio[].roe (flat)
+        or latest_ratio.get("roe")
+        # Path 3: financials.roe (flat di root financials)
+        or financials.get("roe")
+        # Path 4: overview.roe (kadang ada di overview)
+        or overview.get("roe")
+    )
+
+    # ── Dividend yield: cari dari berbagai kemungkinan path ───────────────
+    div_yield = (
+        # Path 1: dividend.yield_ttm
+        dividend.get("yield_ttm")
+        # Path 2: dividend.yield (tanpa _ttm)
+        or dividend.get("yield")
+        # Path 3: overview.dividend_yield
+        or overview.get("dividend_yield")
+        # Path 4: historical valuation
+        or latest_hist.get("yield")
+    )
 
     return {
         "company_name"    : data.get("company_name"),
@@ -107,37 +148,67 @@ def _extract_metrics(data: dict) -> dict:
 # ── Public API ─────────────────────────────────────────────────────────────────
 @st.cache_data(ttl=3600)
 def get_all_companies() -> pd.DataFrame:
-    """Baca semua company dari SQLite cache — 0 Sectors credits."""
+    """Baca semua company dari SQLite cache — 0 Sectors credits.
+
+    Prioritas nilai metrik:
+      1. company_reports (paling lengkap, di-_extract_metrics)
+      2. companies.data screener (roe_ttm / yield_ttm / pe_ttm / pb_mrq)
+    """
     try:
-        conn  = _conn()
-        rows  = conn.execute(
+        conn = _conn()
+        rows = conn.execute(
             "SELECT c.symbol, c.subsector, c.data, cr.data as report_data "
             "FROM companies c "
             "LEFT JOIN company_reports cr ON c.symbol = cr.symbol"
         ).fetchall()
         conn.close()
-        
+
         records = []
+        corrupt = []
         for r in rows:
-            base = {
-                "symbol"    : r[0],
-                "sub_sector": r[1],
-            }
-            # Data dasar dari screener
-            raw = json.loads(r[2])
-            base["company_name"] = raw.get("company_name", r[0])
-            
-            # Merge metrik dari company_report kalau ada
-            if r[3]:
-                report  = json.loads(r[3])
-                metrics = _extract_metrics(report)
-                base.update(metrics)
-            
-            records.append(base)
-        
+            try:
+                base = {
+                    "symbol"    : r[0],
+                    "sub_sector": r[1],
+                }
+                # Data dasar dari screener
+                raw = json.loads(r[2])
+                base["company_name"] = raw.get("company_name", r[0])
+
+                # Extract semua metrik yang mungkin ada di screener data
+                # (tersedia jika companies di-fetch dengan order_by tertentu,
+                #  misal order_by=-roe_ttm, atau hasil get_top_from_api)
+                screener_roe   = raw.get("roe_ttm")   or raw.get("roe")
+                screener_yield = raw.get("yield_ttm") or raw.get("dividend_yield")
+                screener_pe    = raw.get("pe_ttm")    or raw.get("pe")
+                screener_pb    = raw.get("pb_mrq")    or raw.get("pb")
+
+                # Set sebagai nilai dasar — di-overwrite oleh company_report
+                if screener_roe   is not None: base["roe"]            = screener_roe
+                if screener_yield is not None: base["dividend_yield"] = screener_yield
+                if screener_pe    is not None: base["pe_ttm"]         = screener_pe
+                if screener_pb    is not None: base["pb"]             = screener_pb
+
+                # Merge metrik dari company_report kalau ada
+                if r[3]:
+                    report  = json.loads(r[3])
+                    metrics = _extract_metrics(report)
+                    base.update({k: v for k, v in metrics.items() if v is not None})
+
+                # Samakan konvensi nama sub-sektor (pretty vs slug)
+                base["sub_sector"] = _normalize_subsector(base.get("sub_sector"))
+
+                records.append(base)
+            except Exception:
+                # Satu row corrupt tidak boleh membunuh seluruh dataset
+                corrupt.append(r[0])
+                continue
+        if corrupt:
+            print(f"⚠️  {len(corrupt)} row corrupt di-skip: {corrupt[:5]}...")
+
         if not records:
             return pd.DataFrame()
-        
+
         df = pd.DataFrame(records)
         num_cols = ["forward_pe", "pe_ttm", "pb", "roe", "dividend_yield", "market_cap"]
         for col in num_cols:
@@ -190,6 +261,9 @@ def get_companies_with_metrics(subsectors: list = None) -> pd.DataFrame:
                 metrics = _extract_metrics(report)
                 base.update(metrics)
             
+            # Samakan konvensi nama sub-sektor (pretty vs slug)
+            base["sub_sector"] = _normalize_subsector(base.get("sub_sector"))
+
             records.append(base)
         
         conn.close()

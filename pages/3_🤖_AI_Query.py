@@ -76,7 +76,7 @@ if query:
     with st.chat_message("user"):
         st.markdown(query)
 
-    # Panggil Gemini & tampilkan respons
+    # Panggil Groq Agent & tampilkan respons
     with st.chat_message("assistant"):
         with st.spinner("Groq Agent sedang menganalisis... ⏳"):
             answer, tool_log = run_query(query)

@@ -1,6 +1,6 @@
 # Spesifikasi Teknis: IDX Insight Engine
 
-1. **Versi:** 2.0 (Sprint Phase 2)
+1. **Versi:** 2.1 (Sprint Phase 3)
 2. **Terakhir diupdate:** September 2026
 3. **Hackathon:** [Sectors.app Hackathon 2026](https://hackathon.sectors.app) — Track 03: Market Intelligence
 
