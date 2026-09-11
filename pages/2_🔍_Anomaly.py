@@ -227,16 +227,23 @@ with right_col:
 
             # Z-score cards per metrik yang flagged
             if flags:
-                z_cols = st.columns(len(flags))
-                for i, m in enumerate(flags):
-                    z    = row_data.get(f"z_{m}", 0)
-                    dire = "↑ jauh di atas" if z > 0 else "↓ jauh di bawah"
-                    z_cols[i].metric(
-                        label       = METRIC_LABELS.get(m, m),
-                        value       = f"z = {z:+.2f}",
-                        delta       = f"{dire} median",
-                        delta_color = "inverse",
-                    )
+                import math
+                valid_flags = [
+                    m for m in flags
+                    if row_data.get(f"z_{m}") is not None
+                    and not math.isnan(float(row_data.get(f"z_{m}", float("nan"))))
+                ]
+                if valid_flags:
+                    z_cols = st.columns(len(valid_flags))
+                    for i, m in enumerate(valid_flags):
+                        z    = float(row_data[f"z_{m}"])
+                        dire = "↑ jauh di atas" if z > 0 else "↓ jauh di bawah"
+                        z_cols[i].metric(
+                            label       = METRIC_LABELS.get(m, m),
+                            value       = f"z = {z:+.2f}",
+                            delta       = f"{dire} median peer",
+                            delta_color = "inverse",
+                        )
 
             st.divider()
 

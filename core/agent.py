@@ -28,13 +28,44 @@ def _get_company_metrics(symbol: str) -> str:
     return json.dumps(data, ensure_ascii=False)
 
 def _get_sector_companies(subsector: str) -> str:
-    _tool_log.append(f"get_sector_companies(subsector='{subsector}')")
+    """
+    Ambil daftar perusahaan dalam sub-sektor IDX beserta metrik finansial utama.
+    Data dibaca dari SQLite cache — 0 Sectors API credits.
+    Contoh subsector: 'banks', 'telecom', 'coal', 'consumer-goods'
+    """
+    _tool_log.append(f"get_sector_companies('{subsector}')")
+
     df = get_all_companies()
     if df.empty:
-        return json.dumps({"error": "Cache kosong"})
-    mask   = df.get("sub_sector", pd.Series(dtype=str)) == subsector
-    result = df[mask][["symbol", "company_name"]].head(20).to_dict(orient="records")
-    return json.dumps(result, ensure_ascii=False)
+        return json.dumps({"error": "Cache kosong — jalankan init_cache dulu"})
+
+    # Normalisasi input agar 'Banks' dan 'banks' sama-sama cocok
+    mask = df["sub_sector"].str.lower() == subsector.strip().lower()
+    filtered = df[mask]
+
+    if filtered.empty:
+        # Coba partial match jika exact match gagal
+        mask2 = df["sub_sector"].str.lower().str.contains(subsector.strip().lower(), na=False)
+        filtered = df[mask2]
+
+    if filtered.empty:
+        available = df["sub_sector"].dropna().unique().tolist()[:10]
+        return json.dumps({
+            "error"    : f"Sub-sektor '{subsector}' tidak ditemukan",
+            "tersedia" : available,
+        }, ensure_ascii=False)
+
+    # Pilih kolom yang ada (hindari KeyError jika kolom tertentu null semua)
+    want_cols = ["symbol", "company_name", "pe_ttm", "forward_pe",
+                 "roe", "dividend_yield", "pb", "market_cap"]
+    show_cols = [c for c in want_cols if c in filtered.columns]
+
+    result = (
+        filtered[show_cols]
+        .head(20)
+        .to_dict(orient="records")
+    )
+    return json.dumps(result, ensure_ascii=False, default=str)
 
 def _get_top_companies_by_metric(metric: str, subsector: str = "", n: int = 5) -> str:
     _tool_log.append(

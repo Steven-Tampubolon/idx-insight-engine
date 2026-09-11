@@ -44,13 +44,32 @@ avail_mets  = [m for m in METRICS if m in df_raw.columns]
 with st.sidebar:
     st.header("🧮 Formula Builder")
 
+    # ── Preset strategi ──────────────────────────────────────────────────────
+    PRESETS = {
+        "💎 Value Investing" : {"forward_pe": 70, "pb": 60, "roe": 80},
+        "💰 Dividend Focus"  : {"dividend_yield": 80, "forward_pe": 50, "pb": 40},
+        "📈 Quality Growth"  : {"roe": 80, "ps": 50, "forward_pe": 60},
+    }
+    st.caption("Quick start — pilih preset atau atur manual:")
+    p_cols = st.columns(3)
+    for i, (label, weights_preset) in enumerate(PRESETS.items()):
+        if p_cols[i].button(label, use_container_width=True, key=f"preset_{i}"):
+            for metric, val in weights_preset.items():
+                st.session_state[f"w_{metric}"] = val
+            st.session_state["sel_metrics_preset"] = list(weights_preset.keys())
+    st.divider()
+    # ── End preset ───────────────────────────────────────────────────────────
+
     sel_subs = st.multiselect("Sub-sektor", all_subs,
                               default=list(all_subs), placeholder="Semua")
+
+    default_metrics = st.session_state.get("sel_metrics_preset", avail_mets[:3])
+    default_metrics = [m for m in default_metrics if m in avail_mets] or avail_mets[:3]
 
     sel_metrics = st.multiselect(
         "Metrik formula",
         avail_mets,
-        default=avail_mets[:3],
+        default=default_metrics,
         format_func=lambda x: METRICS[x][0],
     )
 
@@ -188,8 +207,8 @@ col_cfg = {
     "sub_sector"    : st.column_config.TextColumn("Sub-sektor"),
     "forward_pe"    : st.column_config.NumberColumn("PE",    format="%.1f"),
     "pb"            : st.column_config.NumberColumn("P/B",   format="%.2f"),
-    "roe"           : st.column_config.NumberColumn("ROE",   format="%.1f"),
-    "dividend_yield": st.column_config.NumberColumn("DY %",  format="%.2f"),
+    "roe"           : st.column_config.NumberColumn("ROE (%)", format="%.1f%%", help="Return on Equity — kosong jika data belum tersedia"),
+    "dividend_yield": st.column_config.NumberColumn("Div. Yield", format="%.2f%%", help="Dividend Yield — kosong jika data belum tersedia"),
     "market_cap"    : st.column_config.NumberColumn("Mkt Cap"),
 }
 
