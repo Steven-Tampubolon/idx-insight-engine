@@ -29,7 +29,7 @@ with st.sidebar:
     st.markdown(
         "- `get_company_metrics` — data satu saham\n"
         "- `get_sector_companies` — daftar per sub-sektor\n"
-        "- `get_top_by_metric` — ranking berdasarkan metrik\n"
+        "- `get_top_companies_by_metric` — ranking berdasarkan metrik\n"
         "- `get_subsector_summary` — perbandingan antar sub-sektor"
     )
     st.caption("Semua baca dari SQLite cache — 0 Sectors credits")
