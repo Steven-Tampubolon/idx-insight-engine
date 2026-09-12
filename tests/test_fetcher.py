@@ -1,6 +1,6 @@
 # tests/test_fetcher.py
 # Jalankan dari root: python -m pytest tests/test_fetcher.py -v
-# Semua test: 0 Sectors credits (mock SQLite, tidak ada HTTP request).
+# Semua test: (mock SQLite, tidak ada HTTP request).
 import json
 import sqlite3
 import sys

@@ -135,7 +135,7 @@ Dapatkan API key di:
 python -m data.init_cache
 ```
 
-Proses ini mengambil data dari Sectors API (~25 credits) dan menyimpannya ke `data/cache.db`. Cukup dijalankan **sekali** sebelum pertama kali menggunakan app.
+Proses ini mengambil data dari Sectors API dan menyimpannya ke `data/cache.db`. Cukup dijalankan **sekali** sebelum pertama kali menggunakan app.
 
 ### 4. Jalankan aplikasi
 
@@ -172,7 +172,7 @@ Buka browser di `http://localhost:8501`.
 2. Atau klik salah satu **suggested query** yang tersedia
 3. Agent secara otonom memilih dan memanggil tools yang relevan
 4. Lihat **"tool call log"** di expander untuk transparansi reasoning agent
-5. Semua data diambil dari SQLite cache — **0 Sectors credits** saat runtime
+5. Semua data diambil dari SQLite cache —  saat runtime
 
 **Contoh query yang didukung:**
 - *"Bandingkan PE ratio BBCA, BMRI, dan BBRI"*

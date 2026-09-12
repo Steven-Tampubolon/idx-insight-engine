@@ -12,7 +12,7 @@ def detect_anomalies(
 ) -> pd.DataFrame:
     """
     Z-score per sub-sektor (bukan global) untuk setiap metrik.
-    Reads dari DataFrame yang sudah di-load dari SQLite — 0 Sectors credits.
+    Reads dari DataFrame yang sudah di-load dari SQLite.
 
     Returns df dengan kolom tambahan:
         z_{metric}      float   z-score vs median sub-sektor

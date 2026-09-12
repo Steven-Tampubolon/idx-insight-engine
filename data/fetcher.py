@@ -148,7 +148,7 @@ def _extract_metrics(data: dict) -> dict:
 # ── Public API ─────────────────────────────────────────────────────────────────
 @st.cache_data(ttl=3600)
 def get_all_companies() -> pd.DataFrame:
-    """Baca semua company dari SQLite cache — 0 Sectors credits.
+    """Baca semua company dari SQLite cache.
 
     Prioritas nilai metrik:
       1. company_reports (paling lengkap, di-_extract_metrics)
@@ -223,7 +223,7 @@ def get_companies_with_metrics(subsectors: list = None) -> pd.DataFrame:
     """
     Ambil data perusahaan dari cache + join dengan data metrik dari company_reports.
     Kalau company_reports kosong, fetch dari Sectors API (lazy, per-company).
-    Untuk screener — baca dari SQLite, 0 credits.
+    Untuk screener — baca dari SQLite.
     """
     try:
         conn = _conn()

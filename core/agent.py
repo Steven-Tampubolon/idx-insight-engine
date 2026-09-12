@@ -2,7 +2,7 @@
 """
 Agent AI untuk IDX Insight Engine.
 Menggunakan Groq API (Qwen) dengan manual tool-calling loop.
-Semua data diambil dari SQLite cache (0 Sectors credits) atau API v2 (lazy cache).
+Semua data diambil dari SQLite cache atau API v2 (lazy cache).
 """
 import json
 import os
@@ -30,7 +30,7 @@ def _get_company_metrics(symbol: str) -> str:
 def _get_sector_companies(subsector: str) -> str:
     """
     Ambil daftar perusahaan dalam sub-sektor IDX beserta metrik finansial utama.
-    Data dibaca dari SQLite cache — 0 Sectors API credits.
+    Data dibaca dari SQLite cache.
     Contoh subsector: 'banks', 'telecom', 'coal', 'consumer-goods'
     """
     _tool_log.append(f"get_sector_companies('{subsector}')")
@@ -74,7 +74,7 @@ def _get_top_companies_by_metric(metric: str, subsector: str = "", n: int = 5) -
     return get_top_from_api(metric=metric, subsector=subsector, n=min(n, 5))
 
 def _get_subsector_summary(metric: str) -> str:
-    """Rata-rata metrik per sub-sektor dari cache — 0 Sectors credits."""
+    """Rata-rata metrik per sub-sektor dari cache."""
     _tool_log.append(f"get_subsector_summary(metric='{metric}')")
     df = get_all_companies()
     if df.empty:

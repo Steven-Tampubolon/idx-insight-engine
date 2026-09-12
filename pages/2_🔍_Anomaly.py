@@ -16,7 +16,7 @@ st.set_page_config(
 st.title("🔍 Anomaly Dashboard")
 st.caption(
     "Saham IDX yang berperilaku berbeda dari median sub-sektornya · "
-    "Semua kalkulasi dari cache lokal — **0 Sectors credits**"
+    "Semua kalkulasi dari cache lokal"
 )
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
@@ -67,7 +67,7 @@ if not selected_subsectors or not selected_metrics:
     st.warning("Pilih minimal satu sub-sektor dan satu metrik di sidebar.")
     st.stop()
 
-# ── Hitung anomali (dari SQLite cache, 0 credits) ─────────────────────────────
+# ── Hitung anomali (dari SQLite cache) ─────────────────────────────
 df_in      = df_all[df_all["sub_sector"].isin(selected_subsectors)].copy()
 df_scored  = detect_anomalies(df_in, metrics=selected_metrics, threshold=threshold)
 df_anomaly = (

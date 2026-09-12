@@ -10,7 +10,7 @@ st.set_page_config(page_title="AI Query — IDX Insight Engine",
 
 st.title("🤖 AI Query")
 
-st.caption("Tanya apa saja tentang saham IDX · Groq Qwen 3.8B + Sectors API v2 · hemat credits via cache")
+st.caption("Tanya apa saja tentang saham IDX · Groq Qwen 3.8B + Sectors API v2")
 
 # ── Session state ─────────────────────────────────────────────────────────────
 if "messages"      not in st.session_state: st.session_state.messages      = []
@@ -32,7 +32,7 @@ with st.sidebar:
         "- `get_top_companies_by_metric` — ranking berdasarkan metrik\n"
         "- `get_subsector_summary` — perbandingan antar sub-sektor"
     )
-    st.caption("Semua baca dari SQLite cache — 0 Sectors credits")
+    st.caption("Semua baca dari SQLite cache")
 
 # ── Ambil pending query (dari tombol suggested) ───────────────────────────────
 pending = st.session_state.pending_query

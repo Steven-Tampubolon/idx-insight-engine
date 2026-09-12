@@ -8,7 +8,7 @@ if not Path("data/cache.db").exists():
     st.error(
         "⚠️ **Cache belum dibuat.** "
         "Jalankan `python -m data.init_cache` di terminal untuk mengambil data "
-        "dari **Sectors REST API** (~75–150 credits), lalu jalankan ulang app ini."
+        "dari **Sectors REST API**, lalu jalankan ulang app ini."
     )
     st.stop()
 

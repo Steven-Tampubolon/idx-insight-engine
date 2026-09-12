@@ -13,7 +13,7 @@ st.set_page_config(page_title="Screener — IDX Insight Engine",
                    page_icon="📊", layout="wide")
 
 st.title("📊 Custom Stock Screener")
-st.caption("Buat formula scoring sendiri · Data dari SQLite cache — **0 Sectors credits**")
+st.caption("Buat formula scoring sendiri · Data dari SQLite cache")
 
 # ── Konfigurasi metrik ────────────────────────────────────────────────────────
 # (label, default_lower_is_better, default_weight)
