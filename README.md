@@ -110,10 +110,28 @@ User Query (Bahasa Indonesia)
 ```bash
 git clone https://github.com/Steven-Tampubolon/idx-insight-engine
 cd idx-insight-engine
+```
+
+### 2. Buat dan aktifkan Virtual Environment (Disarankan)
+
+```bash
+# Buat virtual environment
+python -m venv venv
+
+# Aktifkan environment:
+# - Windows (PowerShell / CMD):
+venv\Scripts\activate
+
+# - macOS / Linux:
+source venv/bin/activate
+```
+
+### 3. Install dependencies
+```bash
 pip install -r requirements.txt
 ```
 
-### 2. Konfigurasi API keys
+### 4. Konfigurasi API keys
 
 ```bash
 # Salin file contoh
@@ -129,7 +147,7 @@ Dapatkan API key di:
 - Sectors: [sectors.app](https://sectors.app)
 - Groq: [console.groq.com](https://console.groq.com)
 
-### 3. Inisialisasi data cache
+### 5. Inisialisasi data cache
 
 ```bash
 python -m data.init_cache
@@ -137,7 +155,7 @@ python -m data.init_cache
 
 Proses ini mengambil data dari Sectors API dan menyimpannya ke `data/cache.db`. Cukup dijalankan **sekali** sebelum pertama kali menggunakan app.
 
-### 4. Jalankan aplikasi
+### 6. Jalankan aplikasi
 
 ```bash
 streamlit run app.py
