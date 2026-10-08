@@ -105,7 +105,7 @@ User Query (Bahasa Indonesia)
 
 ## Instalasi & Menjalankan
 
-### 1. Clone dan install dependencies
+### 1. Clone dan masuk ke direktori
 
 ```bash
 git clone https://github.com/Steven-Tampubolon/idx-insight-engine
